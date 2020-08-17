@@ -5,7 +5,6 @@ let csCropInstance
 
 export default {
     open (avatarDataUrl) {
-        console.log(avatarDataUrl)
         if (!csCropInstance) {
             csCropInstance = new csCropCreater({
                 el: document.createElement('div'),
@@ -18,7 +17,5 @@ export default {
             })
             document.body.appendChild(csCropInstance.$el)
         }
-        // csCropInstance.visible = true
-        // csCropInstance.$data.avatarDataUrl = avatarDataUrl
     }
 }

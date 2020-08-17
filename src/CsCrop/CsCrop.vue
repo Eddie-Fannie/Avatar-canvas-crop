@@ -2,13 +2,13 @@
   <transition name="fade">
     <div class="ef-canvas__crop" v-if="visible">
         <i class="ef-icon--close" @click='efHandleClose'></i>
-        <div class="ef-canvas__imageBox" ref='imageBox'>
-          <div class="ef-canvas__thumbBox"></div>
+        <div class="ef-canvas__imageBox" ref='imageBox' @mousedown="imgMouseDown" @mousemove="imgMouseMove" @mouseup="imgMouseUp">
+          <div class="ef-canvas__thumbBox" ref="thumbBox"></div>
           <div class="ef-canvas__spinner" style="display: none">Loading...</div>
         </div>
         <div class="ef-crop__action">
           <div class="ef-action__container">
-            <span class="ef-button--out" style="float: left">
+            <span class="ef-button--out" style="float: left" @click="zoomOut()">
               <i class="ef-icon--minus"></i>
             </span>
             <input
@@ -21,13 +21,13 @@
               v-model.number="stepradio"
               :style="styleObject"
             />
-            <span class="ef-button--in" style="float: left">
+            <span class="ef-button--in" style="float: left" @click="zoomIn()">
               <i class="ef-icon--plus"></i>
             </span>
           </div>
           <div class="ef-button__container">
             <span class="ef-button__cancel">取消</span>
-            <span class="ef-button__save">保存</span>
+            <span class="ef-button__save" @click="getBlob">保存</span>
           </div>
       </div>
     </div>
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import CropBox from './cropbox.js'
+import {attachEvent, detachEvent, stopEvent} from './../assets/util/event.js'
 export default {
   name: 'CsCrop',  
   components: {},
@@ -46,14 +46,7 @@ export default {
         ratio: 1,
         duration: 300,
         img: {},
-        // avatarDataUrl: '',
-        // options: {
-        //   imageBox: '.ef-canvas__imageBox',
-        //   thumbBox: '.ef-canvas__thumbBox',
-        //   spinner: '.ef-canvas__spinner',
-        //   imageUrl: ''
-        // },
-        cropper: {}
+        state: {}
     }
   },
   computed: {
@@ -74,14 +67,17 @@ export default {
       this.img = new Image()
       let _this = this
       this.img.onload = function () {
-        console.log('图片加载完')
-        console.log(_this.img.width)
+        console.log('加载完')
         _this.setBackground()
+        _this.getDataURL()
+        // attachEvent(this.$refs.imageBox, 'mousedown', _this.imgMouseDown())
+        // attachEvent(this.$refs.imageBox, 'mousemove', _this.imgMouseMove())
+        // attachEvent(document.body, 'mouseup', _this.imgMouseUp())
       },
       this.img.src = this.avatarDataUrl  
     },
     setBackground () {
-      let imageBox = document.getElementsByClassName('ef-canvas__imageBox')[0]
+      console.log(this.ratio)
       const w = parseInt(this.img.width) * this.ratio
       const h = parseInt(this.img.height) * this.ratio
       const pw = (this.$refs.imageBox.clientWidth - w) / 2
@@ -89,33 +85,85 @@ export default {
       console.log(this.$refs.imageBox.clientWidth)
       this.$refs.imageBox.setAttribute('style',
       `background-image:url('${this.img.src}');background-size:${w}px ${h}px;background-position: ${pw}px ${ph}px;background-repeat:no-repeat;`)
-      // 'background-image: url(' + this.img.src + '); ' +
-      // 'background-size: ' + w + 'px ' + h + 'px; ' +
-      // 'background-position: ' + pw + 'px ' + ph + 'px; ' +
-      // 'background-repeat: no-repeat')
+    },
+    getDataURL() {
+      const width = this.$refs.thumbBox.clientWidth
+      const height = this.$refs.thumbBox.clientHeight
+      const canvas = document.createElement('canvas')
+      const dim = this.$refs.imageBox.style.backgroundPosition.split(' ')
+      const size = this.$refs.imageBox.style.backgroundSize.split(' ')
+      const clientWidth = this.$refs.imageBox.clientWidth
+      const clientHeight = this.$refs.imageBox.clientHeight
+      const dx = parseInt(dim[0]) - clientWidth / 2 + width / 2
+      const dy = parseInt(dim[1]) - clientHeight / 2 + height / 2
+      const dw = parseInt(size[0])
+      const dh = parseInt(size[1])
+      const sh = parseInt(this.img.height)
+      const sw = parseInt(this.img.width)
+      canvas.width = width
+      canvas.height = height
+      const context = canvas.getContext('2d')
+      context.drawImage(this.img, 0,0, sw, sh, dx, dy, dw, dh) // sw/sh 被剪裁图像的宽高。 dx/dy 在画布上放置的位置。 width 要使用的图像宽度
+      const imageData = canvas.toDataURL()
+      console.log(imageData)
+      return imageData
+    },
+    getBlob () {
+      const imageData = this.getDataURL()
+      this.avatarDataUrl = imageData
+      const b64 = imageData.replace('data:image/png;base64,', '')
+      const binary = atob(b64)
+      const array = []
+      for (let i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i))
+      }
+      console.log(new Blob([new Uint8Array(array)], {type: 'image/png'}))
+      return new Blob([new Uint8Array(array)], {type: 'image/png'})
+    },
+    zoomIn (radionum = 1.25) {
+      this.ratio *= radionum
+      this.setBackground()
+    },
+    zoomOut (radionum = 0.8) {
+      this.ratio *= radionum
+      this.setBackground()
+    },
+    imgMouseDown(e) {
+      stopEvent(e)
+      this.state = {
+        dragable: true,
+        mouseX: e.clientX,
+        mouseY: e.clientY
+      }
+    },
+    imgMouseMove (e) {
+      stopEvent(e)
+      if (this.state.dragable) {
+        const x = e.clientX - this.state.mouseX
+        const y = e.clientY - this.state.mouseY
+        const bg = this.$refs.imageBox.style.backgroundPosition.split(' ')
+        const bgX = x + parseInt(bg[0])
+        const bgY = y + parseInt(bg[1])
+        this.$refs.imageBox.style.backgroundPosition = bgX + 'px ' + bgY + 'px'
+        this.state.mouseX = e.clientX
+        this.state.mouseY = e.clientY
+      }
+    },
+    imgMouseUp (e) {
+      stopEvent(e)
+      this.state.dragable = false
     },
     // 滑动
     stepChange(e) {
       this.stepradio = e.target.value
       console.log(e.target.value)
-    },
-    getDataURL () {
-
-    },
-    initCropBox () {
-      this.options.imageUrl = this.avatarDataUrl
-      this.cropper = new CropBox(this.options)
-      console.log(this.cropper)
     }
   },
   created() {
-    this.getDataURL()
+
   },
   mounted() {
-    // this.initCropBox()
     this.getImage()
-    console.log(this.$refs.imageBox)
-
   }
 }
 </script>

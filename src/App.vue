@@ -17,10 +17,7 @@ export default {
     }
   },
   methods: {
-    selectAvatar (data) {
-      console.log(data)
-      console.log(data.target.files[0])
-    }
+   
   }
 }
 </script>

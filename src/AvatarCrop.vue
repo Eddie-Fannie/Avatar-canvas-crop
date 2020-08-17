@@ -59,6 +59,7 @@ export default {
     selectAvatar(e) {
         const file = e.target.files[0]
         let reader = new FileReader()
+        this.$emit('efHandleChange', e)
         reader.onload = (e) => {
           console.log(e)
           let data
@@ -68,7 +69,7 @@ export default {
           CsCrop.open(data)
         }
         reader.readAsDataURL(file)
-        this.$emit('efHandleChange', e)
+       
     }
   },
   created() {
@@ -90,16 +91,16 @@ export default {
         background-size: cover;
         >img{
             position: absolute;
-            top:0px;
-            left: 0px;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             border-radius: 50%;
         }
         >input{
           position: absolute;
-          top:0px;
-          left: 0px;
+          top:0;
+          left: 0;
           display: inline-block;
           width: 100%;
           height: 100%;
@@ -121,8 +122,8 @@ export default {
         justify-content: center;
         background-color: rgba(0, 0, 0, 0.4);
         .ef-avatarcrop__icon--camera {
-            width: 28px;
-            height: 25px;
+            width: 14%;
+            height: 12.5%;
             background-size: cover;
             background-image: url("./assets/camera.png");
         }
