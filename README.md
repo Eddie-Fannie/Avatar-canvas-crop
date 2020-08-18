@@ -1,4 +1,4 @@
-# avatarcrop
+# ef-avatarcrop
 
 > a component to crop avatar
 

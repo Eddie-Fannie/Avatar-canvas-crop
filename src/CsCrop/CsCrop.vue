@@ -4,7 +4,7 @@
         <i class="ef-icon--close" @click='efHandleClose'></i>
         <div class="ef-canvas__imageBox" ref='imageBox' @mousedown="imgMouseDown" @mousemove="imgMouseMove" @mouseup="imgMouseUp">
           <div class="ef-canvas__thumbBox" ref="thumbBox"></div>
-          <div class="ef-canvas__spinner" style="display: none">Loading...</div>
+          <div class="ef-canvas__spinner" ref="spinner" style="display: none">Loading...</div>
         </div>
         <div class="ef-crop__action">
           <div class="ef-action__container">
@@ -17,8 +17,8 @@
               step="1"
               min="0"
               @change="stepChange"
-              :max="duration"
-              v-model.number="stepradio"
+              :max="optionObj.duration"
+              v-model.number="optionObj.stepratio"
               :style="styleObject"
             />
             <span class="ef-button--in" style="float: left" @click="zoomIn()">
@@ -42,17 +42,21 @@ export default {
   data() {
     return {
         visible: false,
-        stepradio: 0,
+        // stepradio: 50,
+        lastStepratio: 0,
         ratio: 1,
-        duration: 300,
+        zoomratio: 0,
+        // duration: 100,
         img: {},
-        state: {}
+        state: {},
+        splitNum: 0,
+        leftSplitNum: 0
     }
   },
   computed: {
     styleObject () {
       return {
-        'background' : '-webkit-linear-gradient(top, #059CFA, #059CFA) 0% 0% / '+ this.stepradio*100/this.duration +'% 100% no-repeat'
+        'background' : '-webkit-linear-gradient(top, #059CFA, #059CFA) 0% 0% / '+ this.optionObj.stepratio*100/this.optionObj.duration +'% 100% no-repeat'
       }
     }
   },
@@ -64,10 +68,12 @@ export default {
       this.visible = false
     },
     getImage () {
+      this.$refs.spinner.style.display = 'block'
       this.img = new Image()
       let _this = this
       this.img.onload = function () {
         console.log('加载完')
+        _this.$refs.spinner.style.display = 'none'
         _this.setBackground()
         _this.getDataURL()
         // attachEvent(this.$refs.imageBox, 'mousedown', _this.imgMouseDown())
@@ -117,15 +123,37 @@ export default {
       for (let i = 0; i < binary.length; i++) {
         array.push(binary.charCodeAt(i))
       }
-      console.log(new Blob([new Uint8Array(array)], {type: 'image/png'}))
-      return new Blob([new Uint8Array(array)], {type: 'image/png'})
+      let newBlob = new Blob([new Uint8Array(array)], {type: 'image/png'})
+      this.resolve({action: 'save', avatarFile: newBlob, avatarUrl: imageData})
+      this.visible = false
+      // return new Blob([new Uint8Array(array)], {type: 'image/png'})
     },
-    zoomIn (radionum = 1.25) {
-      this.ratio *= radionum
+    zoomIn (rationum = 1.25) {
+      this.zoomratio++
+      console.log(this.zoomratio)
+      if(this.zoomratio > this.splitNum) {
+        this.zoomratio--
+        this.lastStepratio = this.optionObj.stepratio
+        return
+      }
+      this.optionObj.stepratio += this.optionObj.stepOnce
+      this.lastStepratio = this.optionObj.stepratio
+      this.ratio *= rationum
       this.setBackground()
     },
-    zoomOut (radionum = 0.8) {
-      this.ratio *= radionum
+    zoomOut (rationum = 0.8) {
+      this.zoomratio--
+      console.log(-this.splitNum)
+      console.log(this.zoomratio)
+      if(this.zoomratio < -this.leftSplitNum) {
+        console.log('hhhhh')
+        this.zoomratio++
+        this.lastStepratio = this.optionObj.stepratio;
+        return
+      }
+      this.optionObj.stepratio -= this.optionObj.stepOnce
+      this.lastStepratio = this.optionObj.stepratio;
+      this.ratio *= rationum
       this.setBackground()
     },
     imgMouseDown(e) {
@@ -155,12 +183,32 @@ export default {
     },
     // 滑动
     stepChange(e) {
-      this.stepradio = e.target.value
-      console.log(e.target.value)
+      // this.stepratio = e.target.value
+      const rationum = (this.optionObj.stepratio - this.lastStepratio) / this.optionObj.stepOnce
+      let ratio = 1;
+      if(rationum > 0) {
+        for(let i=0;i<Math.abs(rationum); i++) {
+          this.zoomratio++
+          ratio *= 1.25
+        }
+        this.ratio *= ratio
+        this.setBackground()
+      }
+      if(rationum < 0) {
+        for (let i = 0; i < Math.abs(rationum); i++) {
+          this.zoomratio--;
+          ratio *= 0.8;
+        }
+        this.ratio *= ratio
+        this.setBackground()
+      }
+      this.lastStepratio = this.optionObj.stepratio
     }
   },
   created() {
-
+    this.splitNum = (this.optionObj.duration - this.optionObj.stepratio ) / this.optionObj.stepOnce
+    this.leftSplitNum = (this.optionObj.stepratio) / this.optionObj.stepOnce
+    this.lastStepratio = this.optionObj.stepratio
   },
   mounted() {
     this.getImage()
@@ -392,7 +440,7 @@ export default {
           border: 1px solid #ccc;
           border-radius: 20px;
           text-align: center;
-
+          cursor: pointer;
         }
         .ef-button__save {
           margin-left: 20px;

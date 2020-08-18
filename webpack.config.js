@@ -2,11 +2,14 @@ var path = require('path')
 var webpack = require('webpack')
 
 module.exports = {
-  entry: './src/main.js',
+  entry: NODE_ENV == 'development' ? './src/main.js' : './src/index.js',
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/dist/',
-    filename: 'build.js'
+    filename: 'avatarcrop.js',
+    library: 'ef-avatarcrop',
+    libraryTarget: 'umd',
+    umdNamedDefine: true
   },
   module: {
     rules: [

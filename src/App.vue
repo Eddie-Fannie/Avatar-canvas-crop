@@ -3,7 +3,11 @@
     <avatar-crop 
     avatarUrl = 'http://api.kingdee.com/kdrive/user/file/public?client_id=200547&file_id=142265450&scode=elNmekdEODZGck1DY245M3piK3Z6&sign=42afb99c7af5944db3cc6d679832fef71cdda0ed'
     width="200px" height="200px"
-    @efHandleChange="selectAvatar"
+    acceptType='image/png,image/jpg'
+    :stepratio="100"
+    :duration="300"
+    :stepOnce="20"
+    @uploadSucess="getBlobData"
     />
   </div>
 </template>
@@ -13,11 +17,14 @@ export default {
   name: 'app',
   data () {
     return {
-      
+      BlobData: null
     }
   },
   methods: {
-   
+    getBlobData(data) {
+      console.log(data)
+      this.BlobData = data
+    }
   }
 }
 </script>

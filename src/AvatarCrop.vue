@@ -1,10 +1,11 @@
 <template>
   <div class="ef-avatarcrop__container" :style="styleObject ">
     <div class="ef-avatarcrop__image" :style="{'border-radius': borderRadius}">
-        <img :src="avatarUrl" :style="{'border-radius': borderRadius}">
-        <input type="file" name="avatar" id="file" @change="selectAvatar" accept="image/*" :style="{'border-radius': borderRadius}">
+        <img :src="avatarUrl" :style="{'border-radius': borderRadius}" v-if="avatarUrl">
+        <img :src="avatarNewUrl" :style="{'border-radius': borderRadius}" v-if="avatarNewUrl">
+        <input type="file" name="avatar" id="file" @change="selectAvatar" :accept="acceptType" :style="{'border-radius': borderRadius}">
     </div>
-    <div class="ef-avatarcrop__mask" v-if="avatarUrl" :style="{'border-radius': borderRadius}">
+    <div class="ef-avatarcrop__mask" :style="{'border-radius': borderRadius}">
       <div class="ef-avatarcrop__icon--camera"></div>
       <span class="ef-avatarcrop__tip">修改头像</span>
     </div>
@@ -12,6 +13,7 @@
 </template>
 
 <script>
+function noop() {}
 import CsCrop from './CsCrop'
 export default {
   name: 'AvatarCrop',  
@@ -19,12 +21,7 @@ export default {
   props: {
     avatarUrl: {
         type: String,
-        required: true,
-        // validator: function (value) {
-        //     let arr = value.split('.')
-        //     let type = arr[arr.length-1]
-        //     return ['png', 'jpg', 'svg+xml'].indexOf(type) !== -1
-        // }
+        required: true
     },
     width: {
         type: String,
@@ -39,11 +36,36 @@ export default {
     borderRadius: {
       type: String,
       default: '50%'
-    }
+    },
+    acceptType: {
+      type: String,
+      default: 'image/*'
+    },
+    duration: {
+      type: Number,
+      default: 100
+    },
+    stepratio: {
+      type: Number,
+      default: 50
+    },
+    stepOnce: {
+      type: Number,
+      default: 5
+    },
+    // onSuccess: {
+    //   type: Function,
+    //   default: noop
+    // }
   },
   data() {
     return {
-
+      otherArguments: {
+        stepratio: this.stepratio,
+        duration: this.duration,
+        stepOnce: this.stepOnce
+      },
+      avatarNewUrl: ''
     }
   },
   computed: {
@@ -59,21 +81,23 @@ export default {
     selectAvatar(e) {
         const file = e.target.files[0]
         let reader = new FileReader()
-        this.$emit('efHandleChange', e)
         reader.onload = (e) => {
           console.log(e)
           let data
           if(e.target.result) {
             data = e.target.result
           }
-          CsCrop.open(data)
+          let that = this
+          CsCrop.open(data, this.otherArguments).then((res) => {
+            if(res.action === 'save') {
+              this.avatarNewUrl = res.avatarUrl
+              this.$emit('uploadSucess', res.avatarFile)
+            }
+            console.log(res)
+          })
         }
         reader.readAsDataURL(file)
-       
     }
-  },
-  created() {
-
   },
   mounted() {}
 }

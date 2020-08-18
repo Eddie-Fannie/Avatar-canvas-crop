@@ -1,10 +1,11 @@
 {
-  "name": "avatarcrop",
+  "name": "ef-avatarcrop",
   "description": "a component to crop avatar",
   "version": "1.0.0",
   "author": "Eddie-Fannie <1597271709@qq.com>",
   "license": "MIT",
-  "private": true,
+  "private": false,
+  "main": "dist/avatarcrop.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
