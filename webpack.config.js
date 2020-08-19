@@ -70,7 +70,26 @@ module.exports = {
         options: {
           name: '[name].[ext]?[hash]'
         }
-      }
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        use: [
+          // {
+          //   loader: 'url-loader',
+          //   options: {
+          //     limit: 10000,
+          //     name: utils.assetsPath('img/[name].[hash:7].[ext]')
+          //   }
+          // },
+          {
+            loader: 'image-webpack-loader',
+            options: {
+              bypassOnDebug: true, // webpack@1.x
+              disable: true, // webpack@2.x and newer
+            },
+          }
+        ]
+      },
     ]
   },
   resolve: {
