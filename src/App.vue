@@ -8,6 +8,7 @@
     :duration="300"
     :stepOnce="20"
     @uploadSucess="getBlobData"
+    uploadApi = '/user/upload'
     />
   </div>
 </template>

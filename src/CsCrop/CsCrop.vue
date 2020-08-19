@@ -26,7 +26,7 @@
             </span>
           </div>
           <div class="ef-button__container">
-            <span class="ef-button__cancel">取消</span>
+            <span class="ef-button__cancel" @click='efHandleClose'>取消</span>
             <span class="ef-button__save" @click="getBlob">保存</span>
           </div>
       </div>
@@ -65,6 +65,7 @@ export default {
   },
   methods: {
     efHandleClose () {
+      this.resolve({ action: "close" });
       this.visible = false
     },
     getImage () {
@@ -124,7 +125,23 @@ export default {
         array.push(binary.charCodeAt(i))
       }
       let newBlob = new Blob([new Uint8Array(array)], {type: 'image/png'})
-      this.resolve({action: 'save', avatarFile: newBlob, avatarUrl: imageData})
+      let file = new File([newBlob], 'avatar.png', {type: this.file.type})
+      let fd = new FormData()
+      fd.append('file',file)
+      let resData
+      let xhr = new XMLHttpRequest()
+      xhr.open('POST', this.uploadApi, true)
+      // xhr.setRequestHeader("Content-Type", "multipart/form-data")
+      xhr.onreadystatechange = function() {
+        if(xhr.readyState==4&& xhr.status == 200) {
+          console.log(xhr.responseText)
+          resData = xhr.responseText
+        } else {
+          throw new Error('[ef-avatarcrop]: 头像上传失败')
+        }
+      }
+      xhr.send(fd)
+      this.resolve({action: 'save', avatarFile: newBlob, avatarUrl: imageData, resData: resData})
       this.visible = false
       // return new Blob([new Uint8Array(array)], {type: 'image/png'})
     },

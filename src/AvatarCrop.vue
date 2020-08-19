@@ -1,8 +1,8 @@
 <template>
   <div class="ef-avatarcrop__container" :style="styleObject ">
     <div class="ef-avatarcrop__image" :style="{'border-radius': borderRadius}">
-        <img :src="avatarUrl" :style="{'border-radius': borderRadius}" v-if="avatarUrl">
         <img :src="avatarNewUrl" :style="{'border-radius': borderRadius}" v-if="avatarNewUrl">
+        <img :src="avatarUrl" :style="{'border-radius': borderRadius}" v-else>
         <input type="file" name="avatar" id="file" @change="selectAvatar" :accept="acceptType" :style="{'border-radius': borderRadius}">
     </div>
     <div class="ef-avatarcrop__mask" :style="{'border-radius': borderRadius}">
@@ -53,6 +53,10 @@ export default {
       type: Number,
       default: 5
     },
+    uploadApi: {
+      type: String,
+      required: true
+    }
     // onSuccess: {
     //   type: Function,
     //   default: noop
@@ -88,7 +92,7 @@ export default {
             data = e.target.result
           }
           let that = this
-          CsCrop.open(data, this.otherArguments).then((res) => {
+          CsCrop.open(data, this.otherArguments, file, this.uploadApi).then((res) => {
             if(res.action === 'save') {
               this.avatarNewUrl = res.avatarUrl
               this.$emit('uploadSucess', res.avatarFile)

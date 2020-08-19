@@ -4,23 +4,31 @@ const csCropCreater = Vue.extend(CsCrop)
 let csCropInstance
 
 export default {
-    open (avatarDataUrl, otherArguments) {
+    open (avatarDataUrl, otherArguments, file, requestUrl) {
         return new Promise((resolve, reject) => {
-            if (!csCropInstance) {
-                csCropInstance = new csCropCreater({
-                    el: document.createElement('div'),
-                    data () {
-                        return {
-                            visible: true,
-                            avatarDataUrl: avatarDataUrl,
-                            optionObj: otherArguments,
-                            resolve: resolve,
-                            reject: reject
-                        }
-                    }
-                })
-                document.body.appendChild(csCropInstance.$el)
+            console.log(csCropInstance)
+            if (csCropInstance) {
+                csCropInstance = null
             }
+            csCropInstance = new csCropCreater({
+                el: document.createElement('div'),
+                data () {
+                    return {
+                        visible: true,
+                        avatarDataUrl: avatarDataUrl,
+                        optionObj: otherArguments,
+                        file: file,
+                        uploadApi: requestUrl,
+                        resolve: resolve,
+                        reject: reject
+                    }
+                }
+            })
+            document.body.appendChild(csCropInstance.$el)
         })
+    },
+    close () {
+        if(!csCropInstance) return 
+        csCropInstance.visible = false
     }
 }
