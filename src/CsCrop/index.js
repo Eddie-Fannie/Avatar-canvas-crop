@@ -6,7 +6,6 @@ let csCropInstance
 export default {
     open (avatarDataUrl, otherArguments, file, requestUrl) {
         return new Promise((resolve, reject) => {
-            console.log(csCropInstance)
             if (csCropInstance) {
                 csCropInstance = null
             }

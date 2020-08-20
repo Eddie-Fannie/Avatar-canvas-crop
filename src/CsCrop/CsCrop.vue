@@ -137,11 +137,8 @@ export default {
         if(xhr.readyState == 4 && xhr.status == 200) {
           console.log(xhr.responseText)
           resData = xhr.responseText
-          this.resolve({action: 'save', avatarFile: newBlob, avatarUrl: imageData, resData: resData})
+          _this.resolve({action: 'save', avatarFile: newBlob, avatarUrl: imageData, resData: resData})
         } 
-        // else {
-        //   throw new Error('[ef-avatarcrop]: 头像上传失败')
-        // }
       }
       xhr.send(fd)
       this.visible = false

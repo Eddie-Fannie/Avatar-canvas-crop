@@ -64,32 +64,25 @@ module.exports = {
         loader: 'babel-loader',
         exclude: /node_modules/
       },
-      {
-        test: /\.(png|jpg|gif|svg)$/,
-        loader: 'file-loader',
-        options: {
-          name: '[name].[ext]?[hash]'
-        }
-      },
+      // {
+      //   test: /\.(png|jpg|gif|svg)$/,
+      //   loader: 'file-loader',
+      //   options: {
+      //     name: '[name].[ext]?[hash]'
+      //   }
+      // },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         use: [
           {
-            loader: 'url-loader?limit=10000&name=./[name].[ext]?[hash]',
-            // options: {
-            //   limit: 8192,
-            //   name: utils.assetsPath('img/[name].[hash:7].[ext]')
-            // }
-          },
-          // {
-          //   loader: 'image-webpack-loader',
-          //   options: {
-          //     bypassOnDebug: true, // webpack@1.x
-          //     disable: true, // webpack@2.x and newer
-          //   },
-          // }
+            loader: 'url-loader',
+            options: {
+              limit: 10000,
+              name: '[name].[ext]?[hash]'
+            }
+          }
         ]
-      },
+      }
     ]
   },
   resolve: {
