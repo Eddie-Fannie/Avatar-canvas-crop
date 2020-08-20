@@ -136,7 +136,7 @@ export default {
       xhr.onreadystatechange = function() {
         if(xhr.readyState == 4 && xhr.status == 200) {
           console.log(xhr.responseText)
-          resData = xhr.responseText
+          resData = JSON.parse(xhr.responseText)
           _this.resolve({action: 'save', avatarFile: newBlob, avatarUrl: imageData, resData: resData})
         } 
       }
