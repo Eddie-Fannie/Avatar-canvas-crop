@@ -94,6 +94,7 @@ export default {
           let that = this
           CsCrop.open(data, this.otherArguments, file, this.uploadApi).then((res) => {
             if(res.action === 'save') {
+              this.avatarNewUrl = res.avatarUrl
               this.$emit('uploadSucess', res)
             }
             console.log(res)
