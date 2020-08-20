@@ -75,7 +75,7 @@ module.exports = {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         use: [
           {
-            loader: 'url-loader?limit=619&name=./[name].[ext]?[hash]',
+            loader: 'url-loader?limit=10000&name=./[name].[ext]?[hash]',
             // options: {
             //   limit: 8192,
             //   name: utils.assetsPath('img/[name].[hash:7].[ext]')

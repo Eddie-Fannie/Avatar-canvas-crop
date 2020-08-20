@@ -129,6 +129,7 @@ export default {
       let fd = new FormData()
       fd.append('file',file)
       let resData
+      let _this = this
       let xhr = new XMLHttpRequest()
       xhr.open('POST', this.uploadApi, true)
       // xhr.setRequestHeader("Content-Type", "multipart/form-data")
@@ -136,12 +137,13 @@ export default {
         if(xhr.readyState == 4 && xhr.status == 200) {
           console.log(xhr.responseText)
           resData = xhr.responseText
-        } else {
-          throw new Error('[ef-avatarcrop]: 头像上传失败')
-        }
+          this.resolve({action: 'save', avatarFile: newBlob, avatarUrl: imageData, resData: resData})
+        } 
+        // else {
+        //   throw new Error('[ef-avatarcrop]: 头像上传失败')
+        // }
       }
       xhr.send(fd)
-      this.resolve({action: 'save', avatarFile: newBlob, avatarUrl: imageData, resData: resData})
       this.visible = false
       // return new Blob([new Uint8Array(array)], {type: 'image/png'})
     },
